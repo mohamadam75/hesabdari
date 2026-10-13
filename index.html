@@ -98,6 +98,7 @@ $('save').onclick=async()=>{if(!Object.keys(cart).length){$('message').textConte
 $('newInvoice').onclick=()=>{if(Object.keys(cart).length&&!confirm('اقلام فعلی پاک شوند و فاکتور جدید شروع شود؟'))return;cart={};$('customer').value='';$('date').value=today();renderCart();$('message').textContent='فاکتور جدید آماده است.'};
 $('print').onclick=()=>window.print();
 renderAll();
+window.loadOnlineData = loadOnlineData;
 })();
 </script>
 
@@ -109,7 +110,7 @@ renderAll();
   async function checkSession(){
     try {
       const r = await fetch('/api/session', {credentials:'same-origin',cache:'no-store'});
-      if (r.ok) { overlay.style.display='none'; await loadOnlineData(); }
+      if (r.ok) { overlay.style.display='none'; await window.loadOnlineData(); }
       else overlay.style.display='flex';
     } catch (_) {
       overlay.style.display='flex';
