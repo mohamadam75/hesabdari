@@ -25,7 +25,7 @@ export async function onRequestGet({ request, env }) {
     ).bind(from, from, to, to).all();
 
     const categoryResult = await env.DB.prepare(
-      "SELECT CASE WHEN p.category = 'غذا' THEN 'food' ELSE 'other' END AS kind, COALESCE(SUM(ii.quantity), 0) AS quantity, COALESCE(SUM(ii.line_total), 0) AS total FROM invoice_items ii JOIN invoices i ON i.id = ii.invoice_id LEFT JOIN products p ON p.name = ii.product_name WHERE (? = '' OR i.invoice_date >= ?) AND (? = '' OR i.invoice_date <= ?) GROUP BY kind"
+      "SELECT CASE WHEN p.category IN ('غذا', 'خوراک', 'پیش غذا') THEN 'food' ELSE 'other' END AS kind, COALESCE(SUM(ii.quantity), 0) AS quantity, COALESCE(SUM(ii.line_total), 0) AS total FROM invoice_items ii JOIN invoices i ON i.id = ii.invoice_id LEFT JOIN products p ON p.name = ii.product_name WHERE (? = '' OR i.invoice_date >= ?) AND (? = '' OR i.invoice_date <= ?) GROUP BY kind"
     ).bind(from, from, to, to).all();
 
     const categories = { food: { quantity: 0, total: 0 }, other: { quantity: 0, total: 0 } };
