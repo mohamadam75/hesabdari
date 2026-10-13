@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS invoices (
   payment_method TEXT NOT NULL,
   customer_name TEXT,
   total_amount INTEGER NOT NULL CHECK (total_amount >= 0),
+  discount_amount INTEGER NOT NULL DEFAULT 0 CHECK (discount_amount >= 0),
   item_count INTEGER NOT NULL CHECK (item_count >= 0),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
