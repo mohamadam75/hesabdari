@@ -11,10 +11,25 @@
 @media(max-width:850px){.layout{grid-template-columns:1fr}.fields{grid-template-columns:repeat(2,minmax(0,1fr))}.products{grid-template-columns:repeat(2,minmax(0,1fr))}.add-form{grid-template-columns:1fr 1fr}.add-form .field:first-child{grid-column:1/-1}}
 @media(max-width:440px){.wrap{padding:10px}.section{padding:12px}.products{gap:7px}.product{padding:10px;min-height:90px}.top{padding:15px}.brand{font-size:17px}.actions{flex-wrap:wrap}.fields{gap:8px}}
 @media print{.top,.meta,.menu-section,.management,.actions,.footer{display:none!important}body{background:white}.wrap{padding:0}.layout{display:block}.section{box-shadow:none;border:0}.cart-section{display:block}}
+
+.login-overlay{position:fixed;inset:0;z-index:9999;background:#10271ddf;display:flex;align-items:center;justify-content:center;padding:18px}
+.login-card{width:min(100%,400px);background:#fff;border-radius:16px;padding:24px;box-shadow:0 20px 70px #0004}
+.login-card h2{margin:0 0 8px;color:var(--green);font-size:21px}.login-card p{color:var(--muted);line-height:1.8;font-size:13px}
+.login-card input{width:100%;border:1px solid #cfdad2;border-radius:9px;padding:13px;margin:8px 0 12px}.login-card button{width:100%;padding:12px;border:0;border-radius:9px;background:var(--green);color:#fff;font-weight:700}.login-error{color:var(--red)!important;min-height:20px}
 </style>
 </head>
 <body>
 <header class="top"><div><div class="brand">اکبر جوجه | حسابداری فروش</div><div class="sub">صندوق فروش · نسخه اولیه</div></div><div class="status">ذخیره خودکار روی همین دستگاه فعال است</div></header>
+<div id="adminLogin" class="login-overlay">
+  <form id="adminLoginForm" class="login-card">
+    <h2>ورود مدیر</h2>
+    <p>برای ورود به نرم‌افزار حسابداری، رمز مدیر را وارد کنید.</p>
+    <label for="adminPassword">رمز عبور مدیر</label>
+    <input id="adminPassword" type="password" autocomplete="current-password" required maxlength="1024" autofocus>
+    <button type="submit">ورود به حسابداری</button>
+    <p id="loginError" class="login-error" aria-live="polite"></p>
+  </form>
+</div>
 <main class="wrap">
 <section class="section meta">
 <div class="section-title">اطلاعات فاکتور <small>اطلاعات هر فاکتور را قبل از ثبت بررسی کنید</small></div>
@@ -81,6 +96,42 @@ $('save').onclick=()=>{if(!Object.keys(cart).length){$('message').textContent='�
 $('newInvoice').onclick=()=>{if(Object.keys(cart).length&&!confirm('اقلام فعلی پاک شوند و فاکتور جدید شروع شود؟'))return;cart={};$('customer').value='';$('date').value=today();renderCart();$('message').textContent='فاکتور جدید آماده است.'};
 $('print').onclick=()=>window.print();
 renderAll();
+})();
+</script>
+
+<script>
+(function(){
+  const overlay = document.getElementById('adminLogin');
+  const form = document.getElementById('adminLoginForm');
+  const error = document.getElementById('loginError');
+  async function checkSession(){
+    try {
+      const r = await fetch('/api/session', {credentials:'same-origin',cache:'no-store'});
+      if (r.ok) overlay.style.display='none';
+      else overlay.style.display='flex';
+    } catch (_) {
+      overlay.style.display='flex';
+      error.textContent='اتصال برقرار نشد. صفحه را دوباره بارگذاری کنید.';
+    }
+  }
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    error.textContent='در حال بررسی رمز...';
+    const button=form.querySelector('button');
+    button.disabled=true;
+    try {
+      const r=await fetch('/api/login',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('adminPassword').value})});
+      const data=await r.json();
+      if(!r.ok || !data.ok) throw new Error(data.error==='Incorrect password'?'رمز عبور اشتباه است.':'ورود انجام نشد. چند لحظه دیگر دوباره تلاش کنید.');
+      overlay.style.display='none';
+      document.getElementById('adminPassword').value='';
+    } catch(err) {
+      error.textContent=err.message||'خطا در ورود.';
+    } finally {
+      button.disabled=false;
+    }
+  });
+  checkSession();
 })();
 </script>
 </body>
