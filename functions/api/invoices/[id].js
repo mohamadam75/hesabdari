@@ -2,11 +2,18 @@ function json(data, status = 200) {
   return Response.json(data, { status, headers: { "Cache-Control": "no-store" } });
 }
 
+async function ensureDiscountColumn(env) {
+  try { await env.DB.prepare("ALTER TABLE invoices ADD COLUMN discount_amount INTEGER NOT NULL DEFAULT 0 CHECK (discount_amount >= 0)").run(); }
+  catch (error) { if (!String(error && error.message || "").toLowerCase().includes("duplicate column")) throw error; }
+}
+
 function cleanInvoice(body) {
   const date = typeof body.date === "string" ? body.date : "";
   const payment = typeof body.payment === "string" ? body.payment : "";
   const customer = typeof body.customer === "string" ? body.customer.trim().slice(0, 120) : "";
   const items = Array.isArray(body.items) ? body.items : [];
+  const discount = Number(body.discount ?? 0);
+  if (!Number.isSafeInteger(discount) || discount < 0) return { error: "Invalid discount amount" };
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) ||
       !["کارت‌خوان", "نقدی", "کارت‌به‌کارت", "سایر"].includes(payment) ||
       items.length < 1 || items.length > 100) return { error: "Invalid invoice fields" };
@@ -23,7 +30,8 @@ function cleanInvoice(body) {
     total += lineTotal; count += qty;
     cleanItems.push({ name, price, qty, lineTotal });
   }
-  return { date, payment, customer, items: cleanItems, total, count };
+  if (discount > total) return { error: "Discount cannot exceed subtotal" };
+  return { date, payment, customer, items: cleanItems, total: total - discount, subtotal: total, discount, count };
 }
 
 export async function onRequestPatch({ request, env, params }) {
@@ -35,17 +43,18 @@ export async function onRequestPatch({ request, env, params }) {
   if (invoice.error) return json({ ok: false, error: invoice.error }, 400);
 
   try {
+    await ensureDiscountColumn(env);
     const existing = await env.DB.prepare("SELECT id FROM invoices WHERE id = ?").bind(id).first();
     if (!existing) return json({ ok: false, error: "Invoice not found" }, 404);
     await env.DB.batch([
-      env.DB.prepare("UPDATE invoices SET invoice_date = ?, payment_method = ?, customer_name = ?, total_amount = ?, item_count = ? WHERE id = ?")
-        .bind(invoice.date, invoice.payment, invoice.customer || null, invoice.total, invoice.count, id),
+      env.DB.prepare("UPDATE invoices SET invoice_date = ?, payment_method = ?, customer_name = ?, total_amount = ?, item_count = ?, discount_amount = ? WHERE id = ?")
+        .bind(invoice.date, invoice.payment, invoice.customer || null, invoice.total, invoice.count, invoice.discount, id),
       env.DB.prepare("DELETE FROM invoice_items WHERE invoice_id = ?").bind(id),
       ...invoice.items.map(item => env.DB.prepare(
         "INSERT INTO invoice_items (invoice_id, product_name, unit_price, quantity, line_total) VALUES (?, ?, ?, ?, ?)"
       ).bind(id, item.name, item.price, item.qty, item.lineTotal))
     ]);
-    return json({ ok: true, id, total: invoice.total, count: invoice.count });
+    return json({ ok: true, id, total: invoice.total, discount: invoice.discount, count: invoice.count });
   } catch {
     return json({ ok: false, error: "Could not update invoice" }, 500);
   }
