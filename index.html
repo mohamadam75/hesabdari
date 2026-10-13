@@ -109,7 +109,7 @@ const money=n=>new Intl.NumberFormat('fa-IR').format(n)+' ریال';
 const digits=n=>new Intl.NumberFormat('fa-IR').format(n);
 const today=()=>window.JalaliDate.today();
 const read=(k,f)=>{try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}};
-let products=read('akbar_products',[]),history=read('akbar_history',[]),cart={},category='غذا',invoice=Number(localStorage.getItem('akbar_invoice')||1001),onlineReady=false;
+let products=read('akbar_products',[]),history=read('akbar_history',[]),cart={},category='همه',invoice=Number(localStorage.getItem('akbar_invoice')||1001),onlineReady=false;
 $('date').value=today();
 function persist(){localStorage.setItem('akbar_products',JSON.stringify(products));localStorage.setItem('akbar_history',JSON.stringify(history));localStorage.setItem('akbar_invoice',String(invoice))}
 async function api(path,options={}){const response=await fetch(path,{...options,credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(options.headers||{})}});let data={};try{data=await response.json()}catch{}if(!response.ok||data.ok===false)throw new Error(data.error||('خطای سرور ('+response.status+')'));return data}
