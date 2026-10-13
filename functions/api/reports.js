@@ -24,16 +24,13 @@ export async function onRequestGet({ request, env }) {
       "SELECT ii.product_name AS name, SUM(ii.quantity) AS quantity, SUM(ii.line_total) AS total FROM invoice_items ii JOIN invoices i ON i.id = ii.invoice_id WHERE (? = '' OR i.invoice_date >= ?) AND (? = '' OR i.invoice_date <= ?) GROUP BY ii.product_name ORDER BY total DESC LIMIT 10"
     ).bind(from, from, to, to).all();
 
-    const invoiceResult = await env.DB.prepare(
-      "SELECT id, invoice_number AS no, invoice_date AS date, payment_method AS payment, customer_name AS customer, total_amount AS total, item_count AS count FROM invoices WHERE (? = '' OR invoice_date >= ?) AND (? = '' OR invoice_date <= ?) ORDER BY invoice_date DESC, id DESC LIMIT 100"
+    const categoryResult = await env.DB.prepare(
+      "SELECT CASE WHEN p.category = 'غذا' THEN 'food' ELSE 'other' END AS kind, COALESCE(SUM(ii.quantity), 0) AS quantity, COALESCE(SUM(ii.line_total), 0) AS total FROM invoice_items ii JOIN invoices i ON i.id = ii.invoice_id LEFT JOIN products p ON p.name = ii.product_name WHERE (? = '' OR i.invoice_date >= ?) AND (? = '' OR i.invoice_date <= ?) GROUP BY kind"
     ).bind(from, from, to, to).all();
 
-    const invoices = invoiceResult.results || [];
-    for (const invoice of invoices) {
-      const itemResult = await env.DB.prepare(
-        "SELECT product_name AS name, unit_price AS price, quantity AS qty, line_total AS lineTotal FROM invoice_items WHERE invoice_id = ? ORDER BY id"
-      ).bind(invoice.id).all();
-      invoice.items = itemResult.results || [];
+    const categories = { food: { quantity: 0, total: 0 }, other: { quantity: 0, total: 0 } };
+    for (const row of (categoryResult.results || [])) {
+      categories[row.kind] = { quantity: Number(row.quantity) || 0, total: Number(row.total) || 0 };
     }
 
     return json({
@@ -43,7 +40,7 @@ export async function onRequestGet({ request, env }) {
       summary: summary || { invoice_count: 0, revenue: 0, item_count: 0 },
       payments: paymentResult.results || [],
       topProducts: productResult.results || [],
-      invoices
+      categories
     });
   } catch {
     return json({ ok: false, error: "Could not load reports" }, 500);
