@@ -70,7 +70,7 @@ body{background:radial-gradient(ellipse at top right,#e7f0e7 0,transparent 38%),
 <section class="section menu-section">
 <div class="section-title">انتخاب غذا و اقلام <small>با هر بار زدن «افزودن»، تعداد یک واحد زیاد می‌شود</small></div>
 <div class="tabs" role="tablist" aria-label="گروه محصولات">
-<button class="tab active" data-cat="غذا">غذاها</button><button class="tab" data-cat="نوشیدنی">نوشیدنی‌ها</button><button class="tab" data-cat="اضافه‌ها">اضافه‌ها</button>
+<button class="tab active" data-cat="غذا">غذاها</button><button class="tab" data-cat="خوراک">خوراک</button><button class="tab" data-cat="پیش غذا">پیش‌غذا</button><button class="tab" data-cat="نوشیدنی">نوشیدنی‌ها</button><button class="tab" data-cat="اضافه‌ها">اضافه‌ها</button>
 </div>
 <div class="menu-tools"><input id="search" class="search" placeholder="جست‌وجوی محصول..." aria-label="جست‌وجوی محصول"></div>
 <div id="products" class="products"></div>
@@ -88,7 +88,7 @@ body{background:radial-gradient(ellipse at top right,#e7f0e7 0,transparent 38%),
 <form id="productForm" class="add-form">
 <div class="field"><label for="productName">نام محصول</label><input id="productName" required maxlength="80" placeholder="مثلاً اکبر جوجه"></div>
 <div class="field"><label for="productPrice">قیمت (ریال)</label><input id="productPrice" required type="number" min="1" step="1" placeholder="قیمت"></div>
-<div class="field"><label for="productCat">گروه</label><select id="productCat"><option>غذا</option><option>نوشیدنی</option><option>اضافه‌ها</option></select></div>
+<div class="field"><label for="productCat">گروه</label><select id="productCat"><option>غذا</option><option>خوراک</option><option>پیش غذا</option><option>نوشیدنی</option><option>اضافه‌ها</option></select></div>
 <button class="btn primary" type="submit">افزودن محصول</button>
 </form>
 <div id="manageList" style="margin-top:12px"></div>
