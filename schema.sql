@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS products (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   price INTEGER NOT NULL CHECK (price > 0),
-  category TEXT NOT NULL CHECK (category IN ('غذا', 'نوشیدنی', 'اضافه‌ها')),
+  category TEXT NOT NULL CHECK (category IN ('غذا', 'خوراک', 'پیش غذا', 'نوشیدنی', 'اضافه‌ها')),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
