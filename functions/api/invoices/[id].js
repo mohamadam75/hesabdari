@@ -3,6 +3,7 @@ function json(data, status = 200) {
 }
 
 async function ensureAudit(env) {
+  try { await env.DB.prepare("ALTER TABLE invoices ADD COLUMN discount_amount INTEGER NOT NULL DEFAULT 0 CHECK (discount_amount >= 0)").run(); } catch(e) { if (!String(e?.message||"").toLowerCase().includes("duplicate column")) throw e; }
   try { await env.DB.prepare("ALTER TABLE invoices ADD COLUMN invoice_time TEXT").run(); } catch(e) { if (!String(e?.message||"").toLowerCase().includes("duplicate column")) throw e; }
   try { await env.DB.prepare("ALTER TABLE invoices ADD COLUMN display_number INTEGER").run(); } catch(e) { if (!String(e?.message||"").toLowerCase().includes("duplicate column")) throw e; }
   await env.DB.prepare("CREATE TABLE IF NOT EXISTS invoice_audit (id INTEGER PRIMARY KEY AUTOINCREMENT, invoice_id INTEGER, invoice_number INTEGER, action TEXT NOT NULL, old_total INTEGER, new_total INTEGER, changed_at TEXT NOT NULL, details TEXT)").run();
@@ -53,7 +54,6 @@ export async function onRequestPatch({ request, env, params }) {
         .bind(invoice.date, invoice.time || null, invoice.payment, invoice.customer || null, invoice.total, invoice.count, invoice.discount, id),
       env.DB.prepare("INSERT INTO invoice_audit (invoice_id,invoice_number,action,old_total,new_total,changed_at,details) VALUES (?,?,?,?,?,?,?)")
         .bind(id, existing.display_no, "edit", Number(existing.total_amount)||0, invoice.total, new Date().toISOString(), JSON.stringify({oldDate:existing.invoice_date,newDate:invoice.date,oldPayment:existing.payment_method,newPayment:invoice.payment,oldCustomer:existing.customer_name,newCustomer:invoice.customer,oldDiscount:Number(existing.discount_amount)||0,newDiscount:invoice.discount,items:invoice.items})),
-      env.DB.prepare("INSERT INTO invoice_audit (invoice_id,invoice_number,action,old_total,new_total,changed_at,details) VALUES (?,?,?,?,?,?,?)").bind(id, existing.display_no, "delete", Number(existing.total_amount)||0, null, new Date().toISOString(), JSON.stringify({reason:"invoice deleted"})),
       env.DB.prepare("DELETE FROM invoice_items WHERE invoice_id = ?").bind(id),
       ...invoice.items.map(item => env.DB.prepare(
         "INSERT INTO invoice_items (invoice_id, product_name, unit_price, quantity, line_total) VALUES (?, ?, ?, ?, ?)"
@@ -73,6 +73,7 @@ export async function onRequestDelete({ env, params }) {
     const existing = await env.DB.prepare("SELECT id, invoice_number, COALESCE(display_number,invoice_number) AS display_no, total_amount FROM invoices WHERE id = ?").bind(id).first();
     if (!existing) return json({ ok: false, error: "Invoice not found" }, 404);
     await env.DB.batch([
+      env.DB.prepare("INSERT INTO invoice_audit (invoice_id,invoice_number,action,old_total,new_total,changed_at,details) VALUES (?,?,?,?,?,?,?)").bind(id, existing.display_no, "delete", Number(existing.total_amount)||0, null, new Date().toISOString(), JSON.stringify({reason:"invoice deleted"})),
       env.DB.prepare("DELETE FROM invoice_items WHERE invoice_id = ?").bind(id),
       env.DB.prepare("DELETE FROM invoices WHERE id = ?").bind(id)
     ]);
