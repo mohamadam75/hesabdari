@@ -109,7 +109,7 @@ renderAll();
   async function checkSession(){
     try {
       const r = await fetch('/api/session', {credentials:'same-origin',cache:'no-store'});
-      if (r.ok) overlay.style.display='none';
+      if (r.ok) { overlay.style.display='none'; await loadOnlineData(); }
       else overlay.style.display='flex';
     } catch (_) {
       overlay.style.display='flex';
