@@ -33,6 +33,10 @@ export async function onRequestGet({ request, env }) {
       categories[row.kind] = { quantity: Number(row.quantity) || 0, total: Number(row.total) || 0 };
     }
 
+    let audit = [];
+    try { const a = await env.DB.prepare("SELECT id, invoice_number AS no, action, old_total AS oldTotal, new_total AS newTotal, changed_at AS changedAt, details FROM invoice_audit ORDER BY id DESC LIMIT 200").all(); audit = a.results || []; } catch {}
+    let closures = [];
+    try { const cl = await env.DB.prepare("SELECT id, closed_at AS closedAt, invoice_count AS invoiceCount, item_count AS itemCount, total_amount AS total, payments_json AS paymentsJson, detail_json AS detailJson FROM daily_closures ORDER BY id DESC LIMIT 30").all(); closures = (cl.results || []).map(x => ({...x, payments: JSON.parse(x.paymentsJson || "{}"), invoices: JSON.parse(x.detailJson || "[]")})); } catch {}
     return json({
       ok: true,
       from,
@@ -40,7 +44,9 @@ export async function onRequestGet({ request, env }) {
       summary: summary || { invoice_count: 0, revenue: 0, item_count: 0 },
       payments: paymentResult.results || [],
       topProducts: productResult.results || [],
-      categories
+      categories,
+      audit,
+      closures
     });
   } catch {
     return json({ ok: false, error: "Could not load reports" }, 500);
