@@ -16,6 +16,32 @@
 .login-card{width:min(100%,400px);background:#fff;border-radius:16px;padding:24px;box-shadow:0 20px 70px #0004}
 .login-card h2{margin:0 0 8px;color:var(--green);font-size:21px}.login-card p{color:var(--muted);line-height:1.8;font-size:13px}
 .login-card input{width:100%;border:1px solid #cfdad2;border-radius:9px;padding:13px;margin:8px 0 12px}.login-card button{width:100%;padding:12px;border:0;border-radius:9px;background:var(--green);color:#fff;font-weight:700}.login-error{color:var(--red)!important;min-height:20px}
+
+/* Modern restaurant POS refresh */
+:root{--green:#153f32;--green2:#23694f;--bg:#f4f6f2;--card:#fff;--line:#e2e8e0;--text:#1d2b24;--muted:#718078;--gold:#d5a64d;--red:#b84242;--shadow:0 12px 32px #1b3c2a0b}
+body{background:radial-gradient(ellipse at top right,#e7f0e7 0,transparent 38%),var(--bg);color:var(--text);font-size:14px;line-height:1.65}
+.top{padding:18px max(22px,calc((100vw - 1380px)/2));background:linear-gradient(120deg,#12392d,#1d5942);box-shadow:0 5px 22px #12392d22}
+.brand{font-size:22px;letter-spacing:-.3px}.sub{font-size:12px;opacity:.78}
+.wrap{max-width:1440px;padding:24px}
+.section{border:1px solid #e3e9e2;border-radius:18px;padding:20px;box-shadow:0 8px 26px #183e2b08;margin-bottom:18px}
+.section-title{font-size:16px;margin-bottom:18px}.section-title small{background:#f1f5f0;border-radius:20px;padding:5px 9px}
+.fields{gap:14px}.field label{font-weight:600;color:#68796e}.field input,.field select,.search{border:1px solid #d9e2d9;border-radius:11px;padding:12px 13px;transition:border-color .18s,box-shadow .18s}.field input:focus,.field select:focus,.search:focus{border-color:#4b8b69;box-shadow:0 0 0 3px #23694f15;outline:none}
+.layout{grid-template-columns:minmax(0,1.55fr) minmax(340px,.9fr);gap:18px}
+.tabs{gap:8px}.tab{border-radius:11px;padding:10px 18px;font-weight:700;border-color:#e1e8e0}.tab.active{background:#1c5a42;border-color:#1c5a42;box-shadow:0 5px 12px #1c5a4220}
+.menu-tools{margin-bottom:16px}.products{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.product{background:linear-gradient(160deg,#fff,#fbfcfa);border:1px solid #e4eae3;border-radius:14px;padding:15px;min-height:116px;box-shadow:0 3px 10px #203c2805;transition:transform .16s,border-color .16s,box-shadow .16s}
+.product:hover{border-color:#8db39a;background:#fff;box-shadow:0 8px 20px #1b503010;transform:translateY(-2px)}
+.product-name{font-size:14px;line-height:1.8}.price{font-size:12px;color:#1c6547}.add{background:#1d6045;border-radius:9px;padding:8px 12px;font-weight:700}.add:hover{background:#144a35}
+.cart-section{position:sticky;top:14px;border-top:4px solid var(--gold)}
+.cart-row{padding:14px 0;gap:12px}.cart-name{font-size:13px}.cart-unit{line-height:1.8}
+.qty{background:#f5f7f4;border:1px solid #e6ebe4;border-radius:10px;padding:3px;gap:7px}.qty button{border:0;background:#fff;border-radius:8px;font-weight:700}.qty button:hover{background:#e6f0e8}.qty strong{min-width:20px}
+.sum{background:#f7f9f5;border:1px solid #e8eee5;border-radius:13px;padding:12px 14px;margin-top:16px}.sumline{margin:7px 0}.total{font-size:24px;color:#16543c}
+.actions{gap:9px}.btn{border-radius:10px;padding:11px 14px;font-weight:600;transition:transform .15s,background .15s}.btn:hover{transform:translateY(-1px)}.btn.primary{background:#1b5b42;border-color:#1b5b42;box-shadow:0 5px 12px #1b5b421a}.btn.danger{border-color:#f1dada;background:#fffafa}
+.management{border-top:3px solid #d8b46b}.add-form{gap:12px}.add-form .field input,.add-form .field select{border-radius:10px}.footer{padding:12px;color:#87938b}
+.login-overlay{background:linear-gradient(135deg,#102d23eF,#153f32e8);backdrop-filter:blur(5px)}.login-card{border:1px solid #ffffffb8;border-radius:22px;padding:30px;box-shadow:0 24px 80px #061b1266}.login-card h2{font-size:23px}.login-card input{border-radius:11px}.login-card button{border-radius:11px;background:#1c6045}
+@media(max-width:850px){.wrap{padding:14px}.section{padding:16px}.layout{grid-template-columns:1fr}.cart-section{position:static;order:-1}.products{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:440px){.top{padding:14px}.brand{font-size:18px}.wrap{padding:9px}.section{padding:13px;border-radius:14px}.section-title{font-size:14px;align-items:flex-start}.products{gap:8px}.product{min-height:104px;padding:11px}.actions .btn{flex:1}.total{font-size:21px}}
+
 </style>
 </head>
 <body>
