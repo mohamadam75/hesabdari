@@ -28,7 +28,7 @@ button{border:1px solid var(--line);background:white;border-radius:8px;padding:1
 </style>
 </head>
 <body>
-<header><div><div class="brand">اکبر جوجه | گزارش‌های حسابداری</div><div class="sub">گزارش مستقیم از فاکتورهای ذخیره‌شده در پایگاه داده</div></div><a class="nav" href="/">بازگشت به صندوق فروش</a></header>
+<header><div><div class="brand">اکبر جوجه | گزارش‌های حسابداری</div><div class="sub">خلاصه فروش، تعداد غذا و سایر اقلام، ریز مبالغ و جمع صندوق</div></div><a class="nav" href="/">بازگشت به صندوق فروش</a></header>
 <main>
 <div id="authMessage" class="panel hidden"><div class="message">برای دیدن گزارش‌ها، ابتدا از صفحه صندوق فروش وارد حساب مدیر شوید؛ سپس این صفحه را دوباره باز کنید.<br><a href="/">رفتن به صفحه ورود</a>　<button id="retry">بررسی دوباره ورود</button></div></div>
 <section id="reportApp" class="hidden">
@@ -44,8 +44,10 @@ button{border:1px solid var(--line);background:white;border-radius:8px;padding:1
 <div id="status" class="muted" role="status"></div>
 <div class="cards">
 <div class="metric"><span>مجموع فروش</span><strong id="revenue">۰ ریال</strong></div>
-<div class="metric"><span>تعداد فاکتور</span><strong id="invoiceCount">۰</strong></div>
-<div class="metric"><span>تعداد اقلام فروخته‌شده</span><strong id="itemCount">۰</strong></div>
+<div class="metric"><span>تعداد غذا</span><strong id="foodCount">۰</strong></div>
+<div class="metric"><span>تعداد سایر اقلام</span><strong id="otherCount">۰</strong></div>
+<div class="metric"><span>مبلغ فروش غذا</span><strong id="foodRevenue">۰ ریال</strong></div>
+<div class="metric"><span>مبلغ فروش سایر اقلام</span><strong id="otherRevenue">۰ ریال</strong></div>
 </div>
 <div class="cols" style="margin-top:16px">
 <section class="panel"><div class="title">فروش به تفکیک روش پرداخت</div><div id="payments" class="rows"></div></section>
