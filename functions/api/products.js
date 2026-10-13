@@ -28,7 +28,7 @@ export async function onRequestPost({ request, env }) {
   const price = Number(body.price);
   const cat = body.cat;
   if (!name || name.length > 80 || !Number.isSafeInteger(price) || price < 1 ||
-      !["غذا", "نوشیدنی", "اضافه‌ها"].includes(cat)) {
+      !["غذا", "خوراک", "پیش غذا", "نوشیدنی", "اضافه‌ها"].includes(cat)) {
     return json({ ok: false, error: "Invalid product fields" }, 400);
   }
 
