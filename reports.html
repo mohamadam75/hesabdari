@@ -25,6 +25,23 @@ button{border:1px solid var(--line);background:white;border-radius:8px;padding:1
 .message{padding:15px;border-radius:9px;background:#fff6e5;color:#70551b;line-height:1.9}.empty{text-align:center;color:var(--muted);padding:24px}.hidden{display:none!important}
 @media(max-width:760px){main{padding:10px}.filters{grid-template-columns:1fr 1fr}.filters button{width:100%}.cards{grid-template-columns:1fr}.metric strong{font-size:20px}.cols{grid-template-columns:1fr}header{padding:15px}.brand{font-size:17px}}
 @media print{header .nav,.filters,.quick{display:none!important}body{background:white}main{padding:0}.panel{box-shadow:none;break-inside:avoid}}
+
+/* Unified modern accounting dashboard */
+:root{--green:#153f32;--green2:#23694f;--bg:#f4f6f2;--card:#fff;--line:#e2e8e0;--text:#1d2b24;--muted:#718078;--red:#b84242}
+body{background:radial-gradient(ellipse at top right,#e7f0e7 0,transparent 38%),var(--bg);color:var(--text);line-height:1.65}
+header{padding:18px max(22px,calc((100vw - 1240px)/2));background:linear-gradient(120deg,#12392d,#1d5942);box-shadow:0 5px 22px #12392d22}
+.brand{font-size:22px;letter-spacing:-.3px}.sub{font-size:12px}.nav{border-radius:10px;padding:10px 15px;background:#ffffff12;transition:background .15s}.nav:hover{background:#ffffff25}
+main{max-width:1240px;padding:24px}.panel{border:1px solid #e3e9e2;border-radius:18px;padding:20px;margin-bottom:18px;box-shadow:0 8px 26px #183e2b08}
+.title{font-size:15px;margin-bottom:17px;align-items:center}.field label{font-weight:600;color:#68796e}.field input{border:1px solid #d9e2d9;border-radius:11px;padding:12px 13px}.field input:focus{outline:none;border-color:#4b8b69;box-shadow:0 0 0 3px #23694f15}
+button{border:1px solid #dfe7de;border-radius:10px;padding:11px 14px;font-weight:600;transition:transform .15s,background .15s}button:hover{transform:translateY(-1px)}.primary{background:#1b5b42;border-color:#1b5b42;box-shadow:0 5px 12px #1b5b421a}
+.quick button{background:#f7f9f5}.quick button:hover{background:#e9f1e8}
+.cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.metric{background:linear-gradient(145deg,#fff,#f9fbf7);border:1px solid #e2e9e0;border-radius:16px;padding:19px;min-height:112px}.metric span{font-weight:600;color:#6e7c72}.metric strong{font-size:24px;color:#18563d;line-height:1.5}
+.cols{gap:18px}.row{padding:13px 0}.name{font-size:13px}.amount{color:#1b563e}.bar-wrap{height:7px;background:#e9eee7}.bar{background:linear-gradient(90deg,#246b4f,#6ca17b)}
+#cashSummary{background:#f7f9f5;border-radius:13px;padding:0 16px}#cashSummary .row:last-child{border-top:2px solid #dfe8dd;padding-top:16px;font-size:15px}
+.message{border-radius:12px}
+@media(max-width:760px){main{padding:12px}.panel{padding:15px;border-radius:15px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.metric{padding:14px;min-height:102px}.metric strong{font-size:19px}header{padding:15px}.brand{font-size:18px}.filters{gap:8px}}
+@media(max-width:420px){.cards{grid-template-columns:1fr 1fr;gap:8px}.metric{padding:12px}.metric strong{font-size:17px}.metric span{font-size:11px}main{padding:9px}}
+
 </style>
 </head>
 <body>
