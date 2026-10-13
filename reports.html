@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#174c38">
+<title>گزارش‌های حسابداری | اکبر جوجه</title>
+<style>
+:root{--green:#174c38;--green2:#216449;--bg:#f3f6f4;--card:#fff;--line:#dce5df;--text:#17251d;--muted:#69786f;--red:#b84242}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px Tahoma,Arial,sans-serif}
+header{background:var(--green);color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-size:20px;font-weight:bold}.sub{font-size:12px;opacity:.8;margin-top:6px}
+a,button,input{font:inherit}a{color:inherit}.nav{border:1px solid #ffffff70;border-radius:8px;padding:10px 13px;text-decoration:none}
+main{max-width:1200px;margin:auto;padding:20px}.panel{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px;margin-bottom:16px;box-shadow:0 4px 16px #183e2b0c}
+.title{font-size:15px;font-weight:bold;margin-bottom:14px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.filters{display:grid;grid-template-columns:1fr 1fr auto auto;gap:10px;align-items:end}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}.field input{width:100%;padding:11px;border:1px solid #cfdad2;border-radius:8px;background:white}
+button{border:1px solid var(--line);background:white;border-radius:8px;padding:11px 14px;cursor:pointer}.primary{background:var(--green);color:white;border-color:var(--green)}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.quick button{padding:8px 12px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.metric{background:#f8fbf8;border:1px solid var(--line);border-radius:11px;padding:16px}.metric span{display:block;color:var(--muted);font-size:12px;margin-bottom:10px}.metric strong{font-size:22px;color:var(--green);overflow-wrap:anywhere}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}.rows{display:flex;flex-direction:column}.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.name{font-weight:bold}.muted{font-size:12px;color:var(--muted);margin-top:5px}.amount{font-weight:bold;white-space:nowrap}
+.bar-wrap{height:6px;background:#e8eee9;border-radius:20px;overflow:hidden;margin-top:8px}.bar{height:100%;background:var(--green2);border-radius:20px}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:600px}th,td{text-align:right;padding:12px 10px;border-bottom:1px solid var(--line);white-space:nowrap}th{font-size:12px;color:var(--muted);background:#f8faf8}
+.message{padding:15px;border-radius:9px;background:#fff6e5;color:#70551b;line-height:1.9}.empty{text-align:center;color:var(--muted);padding:24px}.hidden{display:none!important}
+@media(max-width:760px){main{padding:10px}.filters{grid-template-columns:1fr 1fr}.filters button{width:100%}.cards{grid-template-columns:1fr}.metric strong{font-size:20px}.cols{grid-template-columns:1fr}header{padding:15px}.brand{font-size:17px}}
+@media print{header .nav,.filters,.quick{display:none!important}body{background:white}main{padding:0}.panel{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header><div><div class="brand">اکبر جوجه | گزارش‌های حسابداری</div><div class="sub">گزارش مستقیم از فاکتورهای ذخیره‌شده در پایگاه داده</div></div><a class="nav" href="/">بازگشت به صندوق فروش</a></header>
+<main>
+<div id="authMessage" class="panel hidden"><div class="message">برای دیدن گزارش‌ها، ابتدا از صفحه صندوق فروش وارد حساب مدیر شوید؛ سپس این صفحه را دوباره باز کنید.<br><a href="/">رفتن به صفحه ورود</a>　<button id="retry">بررسی دوباره ورود</button></div></div>
+<section id="reportApp" class="hidden">
+<div class="panel">
+<div class="title">بازه گزارش</div>
+<div class="filters">
+<div class="field"><label for="from">از تاریخ</label><input id="from" type="date"></div>
+<div class="field"><label for="to">تا تاریخ</label><input id="to" type="date"></div>
+<button id="apply" class="primary">نمایش گزارش</button><button id="print">چاپ گزارش</button>
+</div>
+<div class="quick"><button data-range="today">امروز</button><button data-range="month">این ماه</button><button data-range="all">همه سوابق</button></div>
+</div>
+<div id="status" class="muted" role="status"></div>
+<div class="cards">
+<div class="metric"><span>مجموع فروش</span><strong id="revenue">۰ ریال</strong></div>
+<div class="metric"><span>تعداد فاکتور</span><strong id="invoiceCount">۰</strong></div>
+<div class="metric"><span>تعداد اقلام فروخته‌شده</span><strong id="itemCount">۰</strong></div>
+</div>
+<div class="cols" style="margin-top:16px">
+<section class="panel"><div class="title">فروش به تفکیک روش پرداخت</div><div id="payments" class="rows"></div></section>
+<section class="panel"><div class="title">۱۰ محصول پرفروش بر اساس مبلغ</div><div id="products" class="rows"></div></section>
+</div>
+<section class="panel"><div class="title">فاکتورهای این بازه <small class="muted">حداکثر ۱۰۰ فاکتور در جدول نمایش داده می‌شود</small></div><div id="invoices" class="table-wrap"></div></section>
+</section>
+</main>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const digits=n=>new Intl.NumberFormat('fa-IR').format(Number(n)||0);
+const money=n=>digits(n)+' ریال';
+const localDate=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const monthStart=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-01'};
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+async function api(path){const r=await fetch(path,{credentials:'same-origin',cache:'no-store'});let data={};try{data=await r.json()}catch{}if(r.status===401)return {unauthenticated:true};if(!r.ok||data.ok===false)throw new Error(data.error||'خطا در دریافت گزارش');return data}
+async function start(){try{const session=await api('/api/session');if(session.unauthenticated){$('authMessage').classList.remove('hidden');return} $('authMessage').classList.add('hidden');$('reportApp').classList.remove('hidden');$('from').value=monthStart();$('to').value=localDate();await load()}catch(e){$('authMessage').classList.remove('hidden');$('authMessage').querySelector('.message').textContent='اتصال برقرار نشد. صفحه را تازه‌سازی کنید.'}}
+async function load(){const from=$('from').value,to=$('to').value;if(from&&to&&from>to){$('status').textContent='تاریخ شروع نمی‌تواند بعد از تاریخ پایان باشد.';return} $('status').textContent='در حال دریافت گزارش...';try{const q=new URLSearchParams();if(from)q.set('from',from);if(to)q.set('to',to);const d=await api('/api/reports?'+q.toString());if(d.unauthenticated){$('reportApp').classList.add('hidden');$('authMessage').classList.remove('hidden');return}
+$('revenue').textContent=money(d.summary.revenue);$('invoiceCount').textContent=digits(d.summary.invoice_count);$('itemCount').textContent=digits(d.summary.item_count);
+renderPayments(d.payments||[]);renderProducts(d.topProducts||[]);renderInvoices(d.invoices||[]);$('status').textContent='گزارش بر اساس اطلاعات ذخیره‌شده در پایگاه داده به‌روز شد.';
+}catch(e){$('status').textContent='گزارش دریافت نشد: '+e.message}}
+function renderPayments(list){const box=$('payments');box.replaceChildren();if(!list.length){box.append(el('div','empty','در این بازه فروشی ثبت نشده است.'));return}const max=Math.max(1,...list.map(x=>Number(x.total)||0));list.forEach(x=>{const row=el('div','row');const left=el('div');left.append(el('div','name',x.method||'نامشخص'),el('div','muted',digits(x.invoices)+' فاکتور'));const right=el('div','amount',money(x.total));row.append(left,right);const wrap=el('div','bar-wrap');wrap.append(el('div','bar'));wrap.firstChild.style.width=Math.min(100,(Number(x.total)||0)/max*100)+'%';box.append(row,wrap)})}
+function renderProducts(list){const box=$('products');box.replaceChildren();if(!list.length){box.append(el('div','empty','هنوز اطلاعات فروش محصولی وجود ندارد.'));return}list.forEach((x,i)=>{const row=el('div','row');const left=el('div');left.append(el('div','name',(i+1)+'. '+x.name),el('div','muted',digits(x.quantity)+' عدد فروخته‌شده'));row.append(left,el('div','amount',money(x.total)));box.append(row)})}
+function renderInvoices(list){const box=$('invoices');box.replaceChildren();if(!list.length){box.append(el('div','empty','فاکتوری در این بازه ثبت نشده است.'));return}const table=el('table'),thead=el('thead'),hr=el('tr');['شماره','تاریخ','مشتری','روش پرداخت','تعداد','مبلغ'].forEach(t=>hr.append(el('th','',t)));thead.append(hr);const tbody=el('tbody');list.forEach(x=>{const tr=el('tr');[digits(x.no),x.date||'—',x.customer||'—',x.payment||'—',digits(x.count),money(x.total)].forEach(t=>tr.append(el('td','',t)));tbody.append(tr)});table.append(thead,tbody);box.append(table)}
+$('apply').onclick=load;$('retry').onclick=start;$('print').onclick=()=>window.print();document.querySelectorAll('[data-range]').forEach(b=>b.onclick=()=>{const range=b.dataset.range;if(range==='today'){$('from').value=localDate();$('to').value=localDate()}else if(range==='month'){$('from').value=monthStart();$('to').value=localDate()}else{$('from').value='';$('to').value=''}load()});start();
+})();
+</script>
+</body>
+</html>
