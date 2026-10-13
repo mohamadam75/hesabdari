@@ -2,15 +2,17 @@ function json(data, status = 200) {
   return Response.json(data, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-async function ensureDiscountColumn(env) {
-  try { await env.DB.prepare("ALTER TABLE invoices ADD COLUMN discount_amount INTEGER NOT NULL DEFAULT 0 CHECK (discount_amount >= 0)").run(); }
-  catch (error) { if (!String(error && error.message || "").toLowerCase().includes("duplicate column")) throw error; }
+async function ensureAudit(env) {
+  try { await env.DB.prepare("ALTER TABLE invoices ADD COLUMN invoice_time TEXT").run(); } catch(e) { if (!String(e?.message||"").toLowerCase().includes("duplicate column")) throw e; }
+  try { await env.DB.prepare("ALTER TABLE invoices ADD COLUMN display_number INTEGER").run(); } catch(e) { if (!String(e?.message||"").toLowerCase().includes("duplicate column")) throw e; }
+  await env.DB.prepare("CREATE TABLE IF NOT EXISTS invoice_audit (id INTEGER PRIMARY KEY AUTOINCREMENT, invoice_id INTEGER, invoice_number INTEGER, action TEXT NOT NULL, old_total INTEGER, new_total INTEGER, changed_at TEXT NOT NULL, details TEXT)").run();
 }
 
 function cleanInvoice(body) {
   const date = typeof body.date === "string" ? body.date : "";
   const payment = typeof body.payment === "string" ? body.payment : "";
   const customer = typeof body.customer === "string" ? body.customer.trim().slice(0, 120) : "";
+  const time = typeof body.time === "string" && /^([01]\\d|2[0-3]):[0-5]\\d$/.test(body.time) ? body.time : "";
   const items = Array.isArray(body.items) ? body.items : [];
   const discount = Number(body.discount ?? 0);
   if (!Number.isSafeInteger(discount) || discount < 0) return { error: "Invalid discount amount" };
@@ -31,7 +33,7 @@ function cleanInvoice(body) {
     cleanItems.push({ name, price, qty, lineTotal });
   }
   if (discount > total) return { error: "Discount cannot exceed subtotal" };
-  return { date, payment, customer, items: cleanItems, total: total - discount, subtotal: total, discount, count };
+  return { date, time, payment, customer, items: cleanItems, total: total - discount, subtotal: total, discount, count };
 }
 
 export async function onRequestPatch({ request, env, params }) {
@@ -43,12 +45,15 @@ export async function onRequestPatch({ request, env, params }) {
   if (invoice.error) return json({ ok: false, error: invoice.error }, 400);
 
   try {
-    await ensureDiscountColumn(env);
-    const existing = await env.DB.prepare("SELECT id FROM invoices WHERE id = ?").bind(id).first();
+    await ensureAudit(env);
+    const existing = await env.DB.prepare("SELECT id, invoice_number, COALESCE(display_number,invoice_number) AS display_no, total_amount, invoice_date, invoice_time, payment_method, customer_name, discount_amount FROM invoices WHERE id = ?").bind(id).first();
     if (!existing) return json({ ok: false, error: "Invoice not found" }, 404);
     await env.DB.batch([
-      env.DB.prepare("UPDATE invoices SET invoice_date = ?, payment_method = ?, customer_name = ?, total_amount = ?, item_count = ?, discount_amount = ? WHERE id = ?")
-        .bind(invoice.date, invoice.payment, invoice.customer || null, invoice.total, invoice.count, invoice.discount, id),
+      env.DB.prepare("UPDATE invoices SET invoice_date = ?, invoice_time = COALESCE(?,invoice_time), payment_method = ?, customer_name = ?, total_amount = ?, item_count = ?, discount_amount = ? WHERE id = ?")
+        .bind(invoice.date, invoice.time || null, invoice.payment, invoice.customer || null, invoice.total, invoice.count, invoice.discount, id),
+      env.DB.prepare("INSERT INTO invoice_audit (invoice_id,invoice_number,action,old_total,new_total,changed_at,details) VALUES (?,?,?,?,?,?,?)")
+        .bind(id, existing.display_no, "edit", Number(existing.total_amount)||0, invoice.total, new Date().toISOString(), JSON.stringify({oldDate:existing.invoice_date,newDate:invoice.date,oldPayment:existing.payment_method,newPayment:invoice.payment,oldCustomer:existing.customer_name,newCustomer:invoice.customer,oldDiscount:Number(existing.discount_amount)||0,newDiscount:invoice.discount,items:invoice.items})),
+      env.DB.prepare("INSERT INTO invoice_audit (invoice_id,invoice_number,action,old_total,new_total,changed_at,details) VALUES (?,?,?,?,?,?,?)").bind(id, existing.display_no, "delete", Number(existing.total_amount)||0, null, new Date().toISOString(), JSON.stringify({reason:"invoice deleted"})),
       env.DB.prepare("DELETE FROM invoice_items WHERE invoice_id = ?").bind(id),
       ...invoice.items.map(item => env.DB.prepare(
         "INSERT INTO invoice_items (invoice_id, product_name, unit_price, quantity, line_total) VALUES (?, ?, ?, ?, ?)"
@@ -64,7 +69,8 @@ export async function onRequestDelete({ env, params }) {
   const id = Number(params.id);
   if (!Number.isSafeInteger(id) || id < 1) return json({ ok: false, error: "Invalid invoice id" }, 400);
   try {
-    const existing = await env.DB.prepare("SELECT id FROM invoices WHERE id = ?").bind(id).first();
+    await ensureAudit(env);
+    const existing = await env.DB.prepare("SELECT id, invoice_number, COALESCE(display_number,invoice_number) AS display_no, total_amount FROM invoices WHERE id = ?").bind(id).first();
     if (!existing) return json({ ok: false, error: "Invoice not found" }, 404);
     await env.DB.batch([
       env.DB.prepare("DELETE FROM invoice_items WHERE invoice_id = ?").bind(id),
