@@ -67,19 +67,7 @@ export async function onRequest(context) {
 
   try {
     const expected = await sign(payload, env.ADMIN_PASSWORD);
-    const suppliedBytes = encoder.encode(signature);
-    const expectedBytes = encoder.encode(expected);
-    if (
-      suppliedBytes.length !== expectedBytes.length ||
-      !crypto.subtle.timingSafeEqual
-    ) {
-      if (signature !== expected) {
-        return Response.json(
-          { ok: false, error: "Invalid session" },
-          { status: 401, headers: { "Cache-Control": "no-store" } }
-        );
-      }
-    } else if (signature !== expected) {
+    if (signature !== expected) {
       return Response.json(
         { ok: false, error: "Invalid session" },
         { status: 401, headers: { "Cache-Control": "no-store" } }
