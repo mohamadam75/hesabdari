@@ -28,6 +28,14 @@ export async function onRequestGet({ request, env }) {
       "SELECT id, invoice_number AS no, invoice_date AS date, payment_method AS payment, customer_name AS customer, total_amount AS total, item_count AS count FROM invoices WHERE (? = '' OR invoice_date >= ?) AND (? = '' OR invoice_date <= ?) ORDER BY invoice_date DESC, id DESC LIMIT 100"
     ).bind(from, from, to, to).all();
 
+    const invoices = invoiceResult.results || [];
+    for (const invoice of invoices) {
+      const itemResult = await env.DB.prepare(
+        "SELECT product_name AS name, unit_price AS price, quantity AS qty, line_total AS lineTotal FROM invoice_items WHERE invoice_id = ? ORDER BY id"
+      ).bind(invoice.id).all();
+      invoice.items = itemResult.results || [];
+    }
+
     return json({
       ok: true,
       from,
@@ -35,7 +43,7 @@ export async function onRequestGet({ request, env }) {
       summary: summary || { invoice_count: 0, revenue: 0, item_count: 0 },
       payments: paymentResult.results || [],
       topProducts: productResult.results || [],
-      invoices: invoiceResult.results || []
+      invoices
     });
   } catch {
     return json({ ok: false, error: "Could not load reports" }, 500);
